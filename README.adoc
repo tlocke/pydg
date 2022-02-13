@@ -1,0 +1,83 @@
+= pg8000
+:toc: preamble
+
+Pydg is a pure-link:http://www.python.org/[Python] https://www.edgedb.com/[EdgeDB]
+client. It is tested on Python versions 3.6+, on CPython and PyPy, and EdgeDB
+versions 1.0+. Pydg is distributed under the https://opensource.org/licenses/MIT[MIT
+Licence].
+
+All bug reports, feature requests and contributions are welcome at
+http://github.com/tlocke/pydg/.
+
+image::https://github.com/tlocke/pydg/workflows/pydg/badge.svg[Build Status]
+
+
+== Installation
+
+To install pg8000 using `pip` type:
+
+`pip install pydg`
+
+
+== Examples
+
+=== Basic Example
+
+Import pg8000, connect to the database, create a table, add some rows and then
+query the table:
+
+[source,python]
+----
+>>> import pydg
+>>>
+>>> # Connect to the database with defaults
+>>>
+>>> con = pydg.connect("edgedb://")
+>>>
+>>> # Create a Book type
+>>>
+>>> con.execute("CREATE TYPE Book {CREATE REQUIRED PROPERTY title -> str;}")
+>>>
+>>> # Add some books
+>>>
+>>> for title in ("Ender's Game", "The Magus"):
+...     con.execute("INSERT Book {title := <str>$title;}", title=title)
+>>>
+>>> # Print all the Books
+>>>
+>>> for book in con.run("SELECT Book {title}"):
+...     print(book)
+[1, "Ender's Game"]
+[2, 'The Magus']
+
+----
+
+
+== Tests
+
+* Install http://testrun.org/tox/latest/[tox]: `pip install tox`
+* Run `tox` from the `pydg` directory: `tox`
+
+This will run the tests against the Python version of the virtual environment,
+on the machine, and the installed EdgeDB version listening on port 5656.
+
+
+== Doing A Release Of Pydg
+
+Run `tox` to make sure all tests pass, then update the release notes, then do:
+
+....
+git tag -a x.y.z -m "version x.y.z"
+rm -r build
+rm -r dist
+python setup.py sdist bdist_wheel
+for f in dist/*; do gpg --detach-sign -a $f; done
+twine upload dist/*
+....
+
+
+== Release Notes
+
+=== Version 0.0.0, 2007-03-08
+
+* First release.
